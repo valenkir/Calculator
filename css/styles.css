@@ -19,16 +19,37 @@ body {
   background-color: rgb(193, 82, 108);
 }
 
+.primary-btn:hover {
+  background-color: rgb(146, 58, 79);
+}
+
 .secondary-btn {
   background-color: rgba(221, 154, 170, 0.6);
   width: 5.5rem;
   height: 5rem;
 }
 
+.secondary-btn:hover {
+  background-color: rgba(177, 124, 136, 0.6);
+}
+
 .other-btn {
   background-color: white;
   width: 5.5rem;
   height: 5rem;
+  margin-bottom: 0.5rem;
+}
+
+.other-btn:hover {
+  background-color: rgb(232, 232, 232);
+}
+
+.transition-duration-500 {
+  transition-duration: 500ms;
+}
+
+.transition-bg {
+  transition-property: background-color;
 }
 
 .white-text-color {
@@ -117,8 +138,6 @@ body {
     "number-buttons number-buttons number-buttons math-buttons math-buttons"
     "number-buttons number-buttons number-buttons math-buttons math-buttons"
     "number-buttons number-buttons number-buttons math-buttons math-buttons";
-  grid-template-columns: repeat(5rem, 5);
-  grid-template-rows: repeat(5rem, 6);
   gap: 0.5rem 3rem;
 }
 
