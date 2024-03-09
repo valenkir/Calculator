@@ -1,0 +1,151 @@
+@font-face {
+  font-family: "Gloria Hallelujah";
+  src: url("../assets/fonts/GloriaHallelujah-Regular.ttf");
+}
+
+$primaryColor: rgb(193, 82, 108);
+$secondaryColor: rgb(221, 154, 170, 0.6);
+$teriaryColor: rgb(255, 255, 255);
+$btnHeight: 6rem;
+$nonDefaultBtnWidth: 5.5rem;
+$primaryBorder: 2px solid rgb(51, 51, 51);
+$fontFamily: "Gloria Hallelujah", sans-serif;
+
+body {
+  padding: 2%;
+  font-size: 1.5rem;
+  font-family: $fontFamily;
+}
+
+@mixin calc-button($bgColor: $primaryColor, $width: $btnHeight) {
+  font-family: $fontFamily;
+  font-weight: bold;
+  border: $primaryBorder;
+  background-color: $bgColor;
+  width: $width;
+  height: 5rem;
+  transition-duration: 500ms;
+  transition-property: background-color;
+  &:hover {
+    background-color: scale-color($color: $bgColor, $lightness: -15%);
+  }
+}
+
+.primary-btn {
+  @include calc-button();
+  color: white;
+}
+
+.secondary-btn {
+  @include calc-button($secondaryColor, $nonDefaultBtnWidth);
+  &--delete {
+    width: 20rem;
+  }
+}
+
+.teriary-btn {
+  @include calc-button($teriaryColor, $nonDefaultBtnWidth);
+  margin-bottom: 0.5rem;
+}
+
+.hand-drawn-border {
+  &-1 {
+    border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+  }
+  &-2 {
+    border-radius: 255px 40px 225px 15px/35px 300px 15px 255px;
+  }
+  &-3 {
+    border-radius: 210px 12px 200px 20px/10px 100px 12px 100px;
+  }
+  &-4 {
+    border-radius: 230px 50px 200px 5px/10px 225px 10px 100px;
+  }
+  &-5 {
+    border-radius: 200px 20px 200px 5px/20px 225px 25px 250px;
+  }
+  &-6 {
+    border-radius: 230px 40px 200px 5px/10px 225px 25px 260px;
+  }
+}
+
+.calculator {
+  border: 0.2rem solid black;
+  width: 35rem;
+  height: 42.5rem;
+  padding: 2%;
+  background-color: rgb(252, 235, 239);
+}
+
+.input-screen-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  width: 100%;
+  gap: 1rem;
+}
+
+.input-screen-section__history-btn {
+  border: none;
+  background-color: transparent;
+  margin-left: auto;
+  width: 3rem;
+  height: 3rem;
+}
+
+.input-screen-section__history-icon-svg {
+  width: 6rem;
+  height: 6rem;
+}
+
+.input-screen-section__history-icon {
+  stroke: black;
+  stroke-width: 0.7rem;
+  fill: none;
+}
+
+.input-screen-section__input-screen {
+  width: 100%;
+  height: 3.75rem;
+  align-self: center;
+  border: $primaryBorder;
+  text-align: right;
+  font-family: $fontFamily;
+  padding-right: 5px;
+  font-size: 2.5rem;
+}
+
+.input-screen-section__input-screen:placeholder-shown {
+  font-family: $fontFamily;
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.buttons-section {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-areas:
+    "mcr-buttons mcr-buttons mcr-buttons mcr-buttons mcr-buttons"
+    "control-buttons control-buttons control-buttons control-buttons control-buttons"
+    "number-buttons number-buttons number-buttons math-buttons math-buttons"
+    "number-buttons number-buttons number-buttons math-buttons math-buttons"
+    "number-buttons number-buttons number-buttons math-buttons math-buttons"
+    "number-buttons number-buttons number-buttons math-buttons math-buttons";
+  gap: 0.5rem 3rem;
+}
+
+.mcr-buttons-section {
+  grid-area: mcr-buttons;
+}
+
+.control-buttons-section {
+  grid-area: control-buttons;
+}
+
+.number-buttons-section {
+  grid-area: number-buttons;
+}
+
+.math-buttons-section {
+  grid-area: math-buttons;
+}
