@@ -81,7 +81,6 @@ body {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  width: 100%;
   gap: 1rem;
 }
 
@@ -113,6 +112,9 @@ body {
   font-family: $fontFamily;
   padding-right: 5px;
   font-size: 2.5rem;
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+  }
 }
 
 .input-screen-section__input-screen:placeholder-shown {
