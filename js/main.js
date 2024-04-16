@@ -5,47 +5,185 @@ const inputField = document.querySelector(
   ".input-screen-section__input-screen"
 );
 let calcInput = "";
+let isResultCalculated = false;
 
+const isZero = (number) => +number === 0;
+
+const getNumberOfExpressionElems = (inputExpression) =>
+  inputExpression.trim().split(" ").length;
+
+const isLastExpressionElemNumber = (inputExpression) =>
+  getNumberOfExpressionElems(inputExpression) === 1 ||
+  getNumberOfExpressionElems(inputExpression) === 3
+    ? true
+    : false;
+
+const isOperationPresentInExpression = (inputExpression) => {
+  const arrExpression = inputExpression.split(" ");
+  const operations = arrExpression.filter((item) => isNaN(item));
+  return operations.length > 0;
+};
+
+const isSeparatorPresent = (inputExpression) => {
+  const arrExpression = inputExpression.split(" ");
+  return arrExpression[arrExpression.length - 1].includes(".");
+};
+
+const removeLastChar = (inputNumber) => {
+  const arrNumber = inputNumber.split("");
+  arrNumber[arrNumber.length - 2] === "."
+    ? arrNumber.splice(arrNumber.length - 2, 2)
+    : arrNumber.splice(arrNumber.length - 1, 1);
+  return arrNumber.join("");
+};
+
+const calculateExpression = (expressionArr) => {
+  if (isNaN(expressionArr[1])) {
+    switch (expressionArr[1]) {
+      case "+":
+        return +expressionArr[0] + +expressionArr[2];
+      case "-":
+        return expressionArr[0] - expressionArr[2];
+      case "/":
+        return +expressionArr[2] === 0
+          ? 0
+          : expressionArr[0] / expressionArr[2];
+      case "x":
+        return expressionArr[0] * expressionArr[2];
+      case "root":
+        return Math.sqrt(expressionArr[0]);
+      case "square":
+        return expressionArr[0] * expressionArr[0];
+    }
+  }
+};
+
+//CLEAR THE CALCULATIONS
 controlBtnSection.addEventListener("click", (event) => {
   const elemClassName = event.target.className;
   if (elemClassName.includes("control-btn")) {
     if (calcInput) {
       const controlBtn = event.target;
       const inputArr = calcInput.split(" ");
+      let lastInputItem = inputArr[inputArr.length - 1];
       switch (controlBtn.textContent.trim().toLowerCase()) {
         case "c":
           calcInput = "";
           inputField.value = "";
           break;
         case "ce":
-          inputArr.splice(inputArr.length - 1, 1);
-          calcInput = inputArr.join(" ");
-          inputField.value = inputArr.join(" ");
+          if (!isNaN(lastInputItem) && !isZero(lastInputItem)) {
+            inputArr.length > 2
+              ? inputArr.splice(inputArr.length - 1, 1, 0)
+              : inputArr.splice(inputArr.length - 1, 1);
+            calcInput = inputArr.join(" ");
+            inputField.value = inputArr.join(" ");
+          }
           break;
         case "delete":
-          let lastInputItem = inputArr[inputArr.length - 1];
-          if (!isNaN(lastInputItem)) {
-            lastInputItem = Math.trunc(+lastInputItem / 10);
-            inputArr[inputArr.length - 1] = lastInputItem + "";
-            if (inputArr.join(" ") === "0") {
+          if (!isNaN(lastInputItem) && lastInputItem) {
+            lastInputItem = removeLastChar(lastInputItem);
+            inputArr[inputArr.length - 1] = +lastInputItem + "";
+            if (isZero(lastInputItem) && inputArr.length === 1) {
               calcInput = "";
               inputField.value = "";
             } else {
               calcInput = inputArr.join(" ");
               inputField.value = inputArr.join(" ");
             }
+          } else if (isNaN(lastInputItem)) {
+            calcInput = "";
+            inputField.value = "";
           }
           break;
       }
+      isResultCalculated = false;
     }
   }
 });
 
+//INPUT NUMBERS
 numberBtnSection.addEventListener("click", (event) => {
-  const elemClassName = event.target.className;
-  if (elemClassName.includes("number-btn")) {
-    const numberBtn = event.target;
-    inputField.value += numberBtn.textContent.trim();
+  debugger;
+  const btnClassName = event.target.className;
+  const numberBtn = event.target;
+  const btnText = numberBtn.textContent.trim();
+  if (btnClassName.includes("number-btn") && !isResultCalculated) {
+    if (inputField.value === "0" && btnText === "0") {
+      inputField.value = btnText;
+    } else if (getNumberOfExpressionElems(calcInput) >= 1) {
+      inputField.value += btnText;
+    }
     calcInput = inputField.value;
+  } else if (btnClassName.includes("dot-btn")) {
+    if (
+      isLastExpressionElemNumber(calcInput) &&
+      !isSeparatorPresent(calcInput)
+    ) {
+      inputField.value === ""
+        ? (inputField.value += `0${btnText}`)
+        : (inputField.value += btnText);
+      calcInput = inputField.value;
+    }
+  } else if (btnClassName.includes("sign-btn")) {
+    if (isLastExpressionElemNumber(calcInput) && !isZero(calcInput)) {
+      const inputArr = calcInput.split(" ");
+      let lastInputItem = +inputArr[inputArr.length - 1];
+      lastInputItem *= -1;
+      inputArr[inputArr.length - 1] = lastInputItem + "";
+      calcInput = inputArr.join(" ");
+      inputField.value = inputArr.join(" ");
+    }
+  } else if (isResultCalculated) {
+    calcInput = "";
+    inputField.value = "";
+    inputField.value = btnText;
+    calcInput = inputField.value;
+    isResultCalculated = false;
+  }
+});
+
+//INPUT OPERATIONS
+operationBtnSection.addEventListener("click", (event) => {
+  debugger;
+  const btnClassName = event.target.className;
+  const operationBtn = event.target;
+  const btnText = operationBtn.textContent.trim();
+  const specialOperations = ["root", "square", "="];
+  if (btnClassName.includes("operation-btn")) {
+    if (
+      !specialOperations.includes(btnText) &&
+      !isOperationPresentInExpression(calcInput)
+    ) {
+      !isZero(calcInput)
+        ? (inputField.value += ` ${operationBtn.textContent.trim()} `)
+        : (inputField.value += `0 ${operationBtn.textContent.trim()} `);
+
+      calcInput = inputField.value;
+      isResultCalculated = false;
+    } else if (
+      specialOperations.includes(btnText) &&
+      !isOperationPresentInExpression(calcInput)
+    ) {
+      const specialExpression = `${calcInput} ${btnText}`;
+      const inputArr = specialExpression.split(" ");
+      inputField.value =
+        btnText === "root" || btnText === "square"
+          ? calculateExpression(inputArr)
+          : calcInput;
+      calcInput = inputField.value;
+      isResultCalculated = true;
+    } else if (isOperationPresentInExpression(calcInput)) {
+      const inputArr = calcInput.split(" ");
+      if (btnText === "root" || btnText === "square") {
+        inputArr.splice(inputArr.length - 2, 1, btnText);
+      } else if (btnText !== "=") {
+        inputField.value = calculateExpression(inputArr) + ` ${btnText} `;
+      } else {
+        inputField.value = calculateExpression(inputArr);
+        isResultCalculated = true;
+      }
+      calcInput = inputField.value;
+    }
   }
 });
