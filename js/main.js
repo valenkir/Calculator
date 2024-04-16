@@ -202,13 +202,19 @@ operationBtnSection.addEventListener("click", (event) => {
           ? calculateExpression(inputArr)
           : calcInput;
       isResultCalculated = true;
-    } else if (isOperationPresentInExpression(calcInput)) {
+    } else if (
+      isOperationPresentInExpression(calcInput) &&
+      getNumberOfExpressionElems(calcInput) === 2
+    ) {
       const inputArr = calcInput.split(" ");
       if (btnText === "root" || btnText === "square") {
         inputArr.splice(inputArr.length - 2, 1, btnText);
         inputField.value = calculateExpression(inputArr);
         isResultCalculated = true;
-      } else if (btnText !== "=") {
+      }
+    } else if (isOperationPresentInExpression(calcInput)) {
+      const inputArr = calcInput.split(" ");
+      if (!specialOperations.includes(btnText)) {
         inputField.value = calculateExpression(inputArr) + ` ${btnText} `;
       } else {
         inputField.value = calculateExpression(inputArr);
