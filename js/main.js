@@ -48,10 +48,10 @@ const getBtnClassName = (btnClassName) => {
 };
 
 const setNumber = (btnText) => {
-  if (inputField.value === "0" && btnText === "0") {
-    inputField.value = btnText;
-  } else if (getNumberOfExpressionElems(calcInput) >= 1) {
+  if (getNumberOfExpressionElems(calcInput) >= 1 && inputField.value !== "0") {
     inputField.value += btnText;
+  } else {
+    inputField.value = btnText;
   }
 };
 
