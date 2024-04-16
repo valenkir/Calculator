@@ -37,6 +37,42 @@ const removeLastChar = (inputNumber) => {
   return arrNumber.join("");
 };
 
+const getBtnClassName = (btnClassName) => {
+  return btnClassName.includes("number-btn")
+    ? "number"
+    : btnClassName.includes("dot-btn")
+    ? "dot"
+    : btnClassName.includes("sign-btn")
+    ? "sign"
+    : -1;
+};
+
+const setNumber = (btnText) => {
+  if (inputField.value === "0" && btnText === "0") {
+    inputField.value = btnText;
+  } else if (getNumberOfExpressionElems(calcInput) >= 1) {
+    inputField.value += btnText;
+  }
+};
+
+const setDecimalSeparator = (btnText) => {
+  if (isLastExpressionElemNumber(calcInput) && !isSeparatorPresent(calcInput)) {
+    inputField.value === ""
+      ? (inputField.value += `0${btnText}`)
+      : (inputField.value += btnText);
+  }
+};
+
+const setMathSign = () => {
+  if (isLastExpressionElemNumber(calcInput) && !isZero(calcInput)) {
+    const inputArr = calcInput.split(" ");
+    let lastInputItem = +inputArr[inputArr.length - 1];
+    lastInputItem *= -1;
+    inputArr[inputArr.length - 1] = lastInputItem + "";
+    inputField.value = inputArr.join(" ");
+  }
+};
+
 const calculateExpression = (expressionArr) => {
   if (isNaN(expressionArr[1])) {
     switch (expressionArr[1]) {
@@ -104,40 +140,36 @@ controlBtnSection.addEventListener("click", (event) => {
 
 //INPUT NUMBERS
 numberBtnSection.addEventListener("click", (event) => {
-  debugger;
-  const btnClassName = event.target.className;
+  const btnClass = getBtnClassName(event.target.className);
   const numberBtn = event.target;
   const btnText = numberBtn.textContent.trim();
-  if (btnClassName.includes("number-btn") && !isResultCalculated) {
-    if (inputField.value === "0" && btnText === "0") {
-      inputField.value = btnText;
-    } else if (getNumberOfExpressionElems(calcInput) >= 1) {
-      inputField.value += btnText;
+  if (!isResultCalculated) {
+    switch (btnClass) {
+      case "number":
+        setNumber(btnText);
+        break;
+      case "dot":
+        setDecimalSeparator(btnText);
+        break;
+      case "sign":
+        setMathSign();
+        break;
     }
     calcInput = inputField.value;
-  } else if (btnClassName.includes("dot-btn")) {
-    if (
-      isLastExpressionElemNumber(calcInput) &&
-      !isSeparatorPresent(calcInput)
-    ) {
-      inputField.value === ""
-        ? (inputField.value += `0${btnText}`)
-        : (inputField.value += btnText);
-      calcInput = inputField.value;
-    }
-  } else if (btnClassName.includes("sign-btn")) {
-    if (isLastExpressionElemNumber(calcInput) && !isZero(calcInput)) {
-      const inputArr = calcInput.split(" ");
-      let lastInputItem = +inputArr[inputArr.length - 1];
-      lastInputItem *= -1;
-      inputArr[inputArr.length - 1] = lastInputItem + "";
-      calcInput = inputArr.join(" ");
-      inputField.value = inputArr.join(" ");
-    }
   } else if (isResultCalculated) {
     calcInput = "";
     inputField.value = "";
-    inputField.value = btnText;
+    switch (btnClass) {
+      case "number":
+        setNumber(btnText);
+        break;
+      case "dot":
+        setDecimalSeparator(btnText);
+        break;
+      case "sign":
+        setMathSign();
+        break;
+    }
     calcInput = inputField.value;
     isResultCalculated = false;
   }
@@ -145,7 +177,6 @@ numberBtnSection.addEventListener("click", (event) => {
 
 //INPUT OPERATIONS
 operationBtnSection.addEventListener("click", (event) => {
-  debugger;
   const btnClassName = event.target.className;
   const operationBtn = event.target;
   const btnText = operationBtn.textContent.trim();
@@ -158,11 +189,10 @@ operationBtnSection.addEventListener("click", (event) => {
       !isZero(calcInput)
         ? (inputField.value += ` ${operationBtn.textContent.trim()} `)
         : (inputField.value += `0 ${operationBtn.textContent.trim()} `);
-
-      calcInput = inputField.value;
       isResultCalculated = false;
     } else if (
       specialOperations.includes(btnText) &&
+      btnText !== "=" &&
       !isOperationPresentInExpression(calcInput)
     ) {
       const specialExpression = `${calcInput} ${btnText}`;
@@ -171,19 +201,20 @@ operationBtnSection.addEventListener("click", (event) => {
         btnText === "root" || btnText === "square"
           ? calculateExpression(inputArr)
           : calcInput;
-      calcInput = inputField.value;
       isResultCalculated = true;
     } else if (isOperationPresentInExpression(calcInput)) {
       const inputArr = calcInput.split(" ");
       if (btnText === "root" || btnText === "square") {
         inputArr.splice(inputArr.length - 2, 1, btnText);
+        inputField.value = calculateExpression(inputArr);
+        isResultCalculated = true;
       } else if (btnText !== "=") {
         inputField.value = calculateExpression(inputArr) + ` ${btnText} `;
       } else {
         inputField.value = calculateExpression(inputArr);
         isResultCalculated = true;
       }
-      calcInput = inputField.value;
     }
+    calcInput = inputField.value;
   }
 });
