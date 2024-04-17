@@ -82,8 +82,15 @@ const getNumberBtnType = (btnTypeInfo) => {
 };
 
 const setNumber = (btnText) => {
-  if (getNumberOfExpressionElems(calcInput) >= 1 && inputField.value !== "0") {
-    inputField.value += btnText;
+  const inputArr = calcInput.split(" ");
+  if (getNumberOfExpressionElems(calcInput) >= 1 && !isZero(inputField.value)) {
+    if (getNumberOfExpressionElems(calcInput) === 3 && inputArr[2] === "0") {
+      inputArr[2] = btnText;
+      inputField.value = inputArr.join(" ");
+      calcInput = inputField.value;
+    } else {
+      inputField.value += btnText;
+    }
   } else {
     inputField.value = btnText;
   }
