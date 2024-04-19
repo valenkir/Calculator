@@ -90,7 +90,7 @@ FEATURES
 - Left Shift + 8 - "x" operation (multiplying)
 - Left Control + Right Bracket ("]") - square
 - Left Control + Left Bracket ("[") - root
-- Left Shift + 5 - "%" operation (NOT IMPLEMENTED)
+- Left Shift + 5 - "%" operation
 - Backspace - delete
 - Delete - "CE"
 - Esc - "C"
