@@ -88,8 +88,8 @@ FEATURES
 - Left Alt + Minus - change the sign of the number
 - Left Shift + Equal - "+" operation
 - Left Shift + 8 - "x" operation (multiplying)
-- Left Control + Right Bracket ("]") - root
-- Left Control + Left Bracket ("[") - square
+- Left Control + Right Bracket ("]") - square
+- Left Control + Left Bracket ("[") - root
 - Left Shift + 5 - "%" operation (NOT IMPLEMENTED)
 - Backspace - delete
 - Delete - "CE"

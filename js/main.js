@@ -4,38 +4,38 @@ const inputField = document.querySelector(
 
 let calcInput = "";
 let isResultCalculated = false;
-let keyboardBtnCode = "";
 let keyPressed = {};
-const keyboardNumberCodes = [
-  { code: "Digit1", key: "1" },
-  { code: "Digit2", key: "2" },
-  { code: "Digit3", key: "3" },
-  { code: "Digit4", key: "4" },
-  { code: "Digit5", key: "5" },
-  { code: "Digit6", key: "6" },
-  { code: "Digit7", key: "7" },
-  { code: "Digit8", key: "8" },
-  { code: "Digit9", key: "9" },
-  { code: "Digit0", key: "0" },
-  { code: "AltLeft Minus", key: "sign" },
-  { code: "Period", key: "." },
+const keyboardSingleCodes = [
+  {
+    code: "49",
+    key: "1",
+    type: "number",
+  },
+  { code: "50", key: "2", type: "number" },
+  { code: "51", key: "3", type: "number" },
+  { code: "52", key: "4", type: "number" },
+  { code: "53", key: "5", type: "number" },
+  { code: "54", key: "6", type: "number" },
+  { code: "55", key: "7", type: "number" },
+  { code: "56", key: "8", type: "number" },
+  { code: "57", key: "9", type: "number" },
+  { code: "48", key: "0", type: "number" },
+  { code: "190", key: ".", type: "number_separator" },
+  { code: "189", key: "-", type: "operation" },
+  { code: "187", key: "=", type: "operation" },
+  { code: "13", key: "=", type: "operation" },
+  { code: "191", key: "/", type: "operation" },
+  { code: "8", key: "delete", type: "clear" },
+  { code: "27", key: "c", type: "clear" },
+  { code: "46", key: "ce", type: "clear" },
 ];
-const keyboardOperationCodes = [
-  { code: "ShiftLeft Equal", key: "+" },
-  { code: "Minus", key: "-" },
-  { code: "Equal", key: "=" },
-  { code: "Enter", key: "=" },
-  { code: "ShiftLeft Digit8", key: "x" },
-  { code: "Slash", key: "/" },
-  { code: "ControlLeft BracketRight", key: "root" },
-  { code: "ControlLeft BracketLeft", key: "square" },
-  { code: "ShiftLeft Digit5", key: "%" },
-];
-
-const keyboardClearInputCodes = [
-  { code: "Backspace", key: "delete" },
-  { code: "Escape", key: "c" },
-  { code: "Delete", key: "ce" },
+const keyboardMultipleCodes = [
+  { firstCode: "18", secondCode: "189", key: "sign", type: "number_sign" },
+  { firstCode: "16", secondCode: "187", key: "+", type: "operation" },
+  { firstCode: "16", secondCode: "56", key: "x", type: "operation" },
+  { firstCode: "17", secondCode: "221", key: "square", type: "operation" },
+  { firstCode: "17", secondCode: "219", key: "root", type: "operation" },
+  { firstCode: "16", secondCode: "53", key: "%", type: "operation" },
 ];
 
 const isZero = (number) => +number === 0;
@@ -275,77 +275,65 @@ $(() => {
       }
     }
   });
+
+  //KEYBOARD EVENTS
+  $(document).keydown((event) => {
+    let keyCode = event.which;
+    keyPressed[keyCode] = true;
+    if (Object.keys(keyPressed).length > 1) {
+      const keys = Object.keys(keyPressed);
+      const [btnsPressed] = keyboardMultipleCodes.filter(
+        (item) => item.firstCode === keys[0] && item.secondCode === keys[1]
+      );
+      if (btnsPressed) {
+        const btnText = btnsPressed.key;
+        const btnType = btnsPressed.type;
+        if (btnType.includes("number")) {
+          if (isResultCalculated) {
+            calcInput = "";
+            inputField.value = "";
+            isResultCalculated = false;
+          }
+          setMathSign();
+          calcInput = inputField.value;
+        } else if (btnType === "operation") {
+          inputOperation(btnText);
+        }
+      }
+    } else {
+      keyCode += "";
+      const btnPressed = keyboardSingleCodes.find(
+        (item) => item.code === keyCode
+      );
+      if (btnPressed) {
+        const btnText = btnPressed.key;
+        const btnType = btnPressed.type;
+        if (btnType.includes("number")) {
+          if (isResultCalculated) {
+            calcInput = "";
+            inputField.value = "";
+            isResultCalculated = false;
+          }
+          switch (btnType) {
+            case "number":
+              setNumber(btnText);
+              break;
+            case "number_separator":
+              setDecimalSeparator(btnText);
+              break;
+          }
+          calcInput = inputField.value;
+        } else if (btnType === "operation") {
+          inputOperation(btnText);
+        } else if (btnType === "clear") {
+          clearInputField(btnText);
+          isResultCalculated = false;
+        }
+      }
+    }
+  });
+
+  $(document).keyup((event) => {
+    delete keyPressed[event.which];
+  });
 });
-
-//KEYBOARD EVENTS
-// document.addEventListener("keydown", (event) => {
-//   keyboardBtnCode = event.code;
-//   keyPressed[keyboardBtnCode] = true;
-// });
-
-// document.addEventListener("keyup", () => {
-//   //WHEN 1 button is pressed (i.e. no special operations like shift+5 are used)
-//   if (Object.keys(keyPressed).length === 1) {
-//     const btnType = getPressedKeyboardBtnType(keyboardBtnCode);
-//     switch (btnType) {
-//       //INPUT NUMBERS
-//       case "number":
-//         const [numberKeyboardBtn] = keyboardNumberCodes.filter(
-//           (keyboardCode) => keyboardCode.code === keyboardBtnCode
-//         );
-//         assembleNumberInField(
-//           getNumberBtnType(numberKeyboardBtn.code),
-//           numberKeyboardBtn.key
-//         );
-//         console.log(numberKeyboardBtn.code);
-//         break;
-//       //INPUT OPERATIONS
-//       case "operation":
-//         const [operationKeyboardBtn] = keyboardOperationCodes.filter(
-//           (keyboardCode) => keyboardCode.code === keyboardBtnCode
-//         );
-//         inputOperation(operationKeyboardBtn.key);
-//         console.log(operationKeyboardBtn.code);
-//         break;
-//       //CLEAR THE INPUT
-//       case "clear":
-//         if (calcInput) {
-//           const [clearKeyboardBtn] = keyboardClearInputCodes.filter(
-//             (keyboardCode) => keyboardCode.code === keyboardBtnCode
-//           );
-//           clearInputField(clearKeyboardBtn.key);
-//           console.log(clearKeyboardBtn.code);
-//           isResultCalculated = false;
-//         }
-//         break;
-//     }
-//   }
-//   //FOR HANDLING MULTIPLE BUTTONS PRESSED AT THE SAME TIME
-//   if (Object.keys(keyPressed).length > 1) {
-//     const multipleBtnKey = Object.keys(keyPressed).join(" ");
-//     console.log(multipleBtnKey);
-//     const btnType = getPressedKeyboardBtnType(multipleBtnKey);
-//     switch (btnType) {
-//       //INPUT NUMBERS
-//       case "number":
-//         const [keyboardBtn] = keyboardNumberCodes.filter(
-//           (keyboardCode) => keyboardCode.code === multipleBtnKey
-//         );
-//         assembleNumberInField(
-//           getNumberBtnType(keyboardBtn.code),
-//           keyboardBtn.key
-//         );
-//         break;
-//       //INPUT OPERATIONS
-//       case "operation":
-//         const [operationKeyboardBtn] = keyboardOperationCodes.filter(
-//           (keyboardCode) => keyboardCode.code === multipleBtnKey
-//         );
-//         inputOperation(operationKeyboardBtn.key);
-//         break;
-//     }
-//   }
-//   for (const property of Object.getOwnPropertyNames(keyPressed)) {
-//     delete keyPressed[property];
-//   }
-// });
