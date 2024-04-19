@@ -1,7 +1,7 @@
 FE course challenge - calculator built with grid.
 
 The logic is mostly implemented as in the Windows app "Calculator".
-Current restrictions: the MCR buttons don't work and the % operation is not implemented yet.
+Current restrictions: the MCR buttons don't work yet.
 Also, there is no limitation for the max number length. It may be added in the future.
 
 ---

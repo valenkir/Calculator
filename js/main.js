@@ -1,14 +1,11 @@
-const numberBtnSection = document.querySelector(".number-buttons-section");
-const operationBtnSection = document.querySelector(".math-buttons-section");
-const controlBtnSection = document.querySelector(".control-buttons-section");
 const inputField = document.querySelector(
   ".input-screen-section__input-screen"
 );
+
 let calcInput = "";
 let isResultCalculated = false;
 let keyboardBtnCode = "";
 let keyPressed = {};
-const specialOperations = ["root", "square", "="];
 const keyboardNumberCodes = [
   { code: "Digit1", key: "1" },
   { code: "Digit2", key: "2" },
@@ -52,12 +49,6 @@ const isLastExpressionElemNumber = (inputExpression) =>
     ? true
     : false;
 
-const isOperationPresentInExpression = (inputExpression) => {
-  const arrExpression = inputExpression.split(" ");
-  const operations = arrExpression.filter((item) => isNaN(item));
-  return operations.length > 0;
-};
-
 const isSeparatorPresent = (inputExpression) => {
   const arrExpression = inputExpression.split(" ");
   return arrExpression[arrExpression.length - 1].includes(".");
@@ -71,16 +62,6 @@ const removeLastChar = (inputNumber) => {
   return arrNumber.join("");
 };
 
-const getNumberBtnType = (btnTypeInfo) => {
-  return btnTypeInfo.includes("number-btn") || btnTypeInfo.includes("Digit")
-    ? "number"
-    : btnTypeInfo.includes("dot-btn") || btnTypeInfo.includes("Period")
-    ? "dot"
-    : btnTypeInfo.includes("sign-btn") || btnTypeInfo.includes("AltLeft Minus")
-    ? "sign"
-    : -1;
-};
-
 const setNumber = (btnText) => {
   const inputArr = calcInput.split(" ");
   if (getNumberOfExpressionElems(calcInput) >= 1 && !isZero(inputField.value)) {
@@ -91,6 +72,8 @@ const setNumber = (btnText) => {
     } else {
       inputField.value += btnText;
     }
+  } else if (calcInput.includes(".")) {
+    inputField.value += btnText;
   } else {
     inputField.value = btnText;
   }
@@ -114,76 +97,55 @@ const setMathSign = () => {
   }
 };
 
-const assembleNumberInField = (numberElement, strToInput) => {
-  if (!isResultCalculated) {
-    switch (numberElement) {
-      case "number":
-        setNumber(strToInput);
-        break;
-      case "dot":
-        setDecimalSeparator(strToInput);
-        break;
-      case "sign":
-        setMathSign();
-        break;
-    }
-  } else if (isResultCalculated) {
-    calcInput = "";
-    inputField.value = "";
-    switch (numberElement) {
-      case "number":
-        setNumber(strToInput);
-        break;
-      case "dot":
-        setDecimalSeparator(strToInput);
-        break;
-      case "sign":
-        setMathSign();
-        break;
-    }
-    isResultCalculated = false;
-  }
-  calcInput = inputField.value;
-};
-
 const inputOperation = (btnText) => {
-  if (
-    !specialOperations.includes(btnText) &&
-    !isOperationPresentInExpression(calcInput)
-  ) {
-    !isZero(calcInput)
-      ? (inputField.value += ` ${btnText} `)
-      : (inputField.value += `0 ${btnText} `);
-    isResultCalculated = false;
-  } else if (
-    specialOperations.includes(btnText) &&
-    btnText !== "=" &&
-    !isOperationPresentInExpression(calcInput)
-  ) {
-    const specialExpression = `${calcInput} ${btnText}`;
-    const inputArr = specialExpression.split(" ");
-    inputField.value =
-      btnText === "root" || btnText === "square"
-        ? calculateExpression(inputArr)
-        : calcInput;
-    isResultCalculated = true;
-  } else if (
-    isOperationPresentInExpression(calcInput) &&
-    getNumberOfExpressionElems(calcInput) === 2
-  ) {
-    const inputArr = calcInput.split(" ");
-    if (btnText === "root" || btnText === "square") {
-      inputArr.splice(inputArr.length - 2, 1, btnText);
-      inputField.value = calculateExpression(inputArr);
+  const singleOperations = ["root", "square"];
+  const pairOperations = ["+", "-", "/", "x"];
+  const operationType = singleOperations.includes(btnText)
+    ? "single"
+    : pairOperations.includes(btnText)
+    ? "pair"
+    : btnText;
+  if (isZero(calcInput)) {
+    if (operationType === "pair") {
+      inputField.value += `0 ${btnText} `;
+      isResultCalculated = false;
+    }
+  } else if (getNumberOfExpressionElems(calcInput) === 1) {
+    switch (operationType) {
+      case "pair":
+        inputField.value += ` ${btnText} `;
+        isResultCalculated = false;
+        break;
+      case "single":
+        inputField.value = calculateExpression([calcInput, btnText]);
+        isResultCalculated = true;
+        break;
+    }
+  } else if (getNumberOfExpressionElems(calcInput) === 2) {
+    if (operationType === "single") {
+      const inputArr = calcInput.split(" ");
+      inputField.value = calculateExpression([inputArr[0], btnText]);
       isResultCalculated = true;
     }
-  } else if (isOperationPresentInExpression(calcInput)) {
+  } else if (getNumberOfExpressionElems(calcInput) === 3) {
     const inputArr = calcInput.split(" ");
-    if (!specialOperations.includes(btnText)) {
-      inputField.value = calculateExpression(inputArr) + ` ${btnText} `;
-    } else {
-      inputField.value = calculateExpression(inputArr);
-      isResultCalculated = true;
+    switch (operationType) {
+      case "pair":
+        inputField.value = `${calculateExpression(inputArr)} ${btnText} `;
+        isResultCalculated = false;
+        break;
+      case "%":
+        inputField.value = `${inputArr[0]} ${inputArr[1]} ${calculateExpression(
+          inputArr,
+          true
+        )}`;
+        isResultCalculated = false;
+        break;
+      case "single":
+      case "=":
+        inputField.value = calculateExpression(inputArr);
+        isResultCalculated = true;
+        break;
     }
   }
   calcInput = inputField.value;
@@ -192,7 +154,7 @@ const inputOperation = (btnText) => {
 const clearInputField = (btnText) => {
   const inputArr = calcInput.split(" ");
   let lastInputItem = inputArr[inputArr.length - 1];
-  switch (btnText) {
+  switch (btnText.toLowerCase()) {
     case "c":
       calcInput = "";
       inputField.value = "";
@@ -225,9 +187,10 @@ const clearInputField = (btnText) => {
   }
 };
 
-const calculateExpression = (expressionArr) => {
-  if (isNaN(expressionArr[1])) {
-    switch (expressionArr[1]) {
+const calculateExpression = (expressionArr, percentageOperation = false) => {
+  const operation = percentageOperation ? "%" : expressionArr[1];
+  if (isNaN(operation)) {
+    switch (operation) {
       case "+":
         return +expressionArr[0] + +expressionArr[2];
       case "-":
@@ -242,6 +205,9 @@ const calculateExpression = (expressionArr) => {
         return Math.sqrt(expressionArr[0]);
       case "square":
         return expressionArr[0] * expressionArr[0];
+      case "%":
+        const result = (expressionArr[2] * expressionArr[0]) / 100;
+        return result;
     }
   }
 };
@@ -272,106 +238,114 @@ const getPressedKeyboardBtnType = (btnCode) => {
   return btnType;
 };
 
-//CLEAR THE CALCULATIONS
-controlBtnSection.addEventListener("click", (event) => {
-  const elemClassName = event.target.className;
-  if (elemClassName.includes("control-btn")) {
-    if (calcInput) {
-      const controlBtn = event.target;
-      const btnText = controlBtn.textContent.trim().toLowerCase();
-      clearInputField(btnText);
+$(() => {
+  //INPUT NUMBERS
+  $(".number-buttons-section").on("click", (event) => {
+    const btnText = $(event.target).text().trim();
+    if (isResultCalculated) {
+      calcInput = "";
+      inputField.value = "";
       isResultCalculated = false;
     }
-  }
-});
+    if ($(event.target).hasClass("number-btn")) {
+      setNumber(btnText);
+    } else if ($(event.target).hasClass("dot-btn")) {
+      setDecimalSeparator(btnText);
+    } else if ($(event.target).hasClass("sign-btn")) {
+      setMathSign();
+    }
+    calcInput = inputField.value;
+  });
 
-//INPUT NUMBERS
-numberBtnSection.addEventListener("click", (event) => {
-  const btnClass = getNumberBtnType(event.target.className);
-  const numberBtn = event.target;
-  const btnText = numberBtn.textContent.trim();
-  assembleNumberInField(btnClass, btnText);
-});
+  //INPUT OPERATIONS
+  $(".math-buttons-section").on("click", (event) => {
+    const btnText = $(event.target).text().trim();
+    if ($(event.target).hasClass("operation-btn")) {
+      inputOperation(btnText);
+    }
+  });
 
-//INPUT OPERATIONS
-operationBtnSection.addEventListener("click", (event) => {
-  const btnClassName = event.target.className;
-  const operationBtn = event.target;
-  const btnText = operationBtn.textContent.trim();
-  if (btnClassName.includes("operation-btn")) {
-    inputOperation(btnText);
-  }
+  //CLEAR INPUT
+  $(".control-buttons-section").on("click", (event) => {
+    if ($(event.target).hasClass("control-btn")) {
+      if (calcInput) {
+        const btnText = $(event.target).text().trim();
+        clearInputField(btnText);
+        isResultCalculated = false;
+      }
+    }
+  });
 });
 
 //KEYBOARD EVENTS
-document.addEventListener("keydown", (event) => {
-  keyboardBtnCode = event.code;
-  keyPressed[keyboardBtnCode] = true;
-});
+// document.addEventListener("keydown", (event) => {
+//   keyboardBtnCode = event.code;
+//   keyPressed[keyboardBtnCode] = true;
+// });
 
-document.addEventListener("keyup", () => {
-  //WHEN 1 button is pressed (i.e. no special operations like shift+5 are used)
-  if (Object.keys(keyPressed).length === 1) {
-    const btnType = getPressedKeyboardBtnType(keyboardBtnCode);
-    switch (btnType) {
-      //INPUT NUMBERS
-      case "number":
-        const [numberKeyboardBtn] = keyboardNumberCodes.filter(
-          (keyboardCode) => keyboardCode.code === keyboardBtnCode
-        );
-        assembleNumberInField(
-          getNumberBtnType(numberKeyboardBtn.code),
-          numberKeyboardBtn.key
-        );
-        console.log(numberKeyboardBtn.code);
-        break;
-      //INPUT OPERATIONS
-      case "operation":
-        const [operationKeyboardBtn] = keyboardOperationCodes.filter(
-          (keyboardCode) => keyboardCode.code === keyboardBtnCode
-        );
-        inputOperation(operationKeyboardBtn.key);
-        console.log(operationKeyboardBtn.code);
-        break;
-      //CLEAR THE INPUT
-      case "clear":
-        if (calcInput) {
-          const [clearKeyboardBtn] = keyboardClearInputCodes.filter(
-            (keyboardCode) => keyboardCode.code === keyboardBtnCode
-          );
-          clearInputField(clearKeyboardBtn.key);
-          console.log(clearKeyboardBtn.code);
-          isResultCalculated = false;
-        }
-        break;
-    }
-  }
-  //FOR HANDLING MULTIPLE BUTTONS PRESSED AT THE SAME TIME
-  if (Object.keys(keyPressed).length > 1) {
-    const multipleBtnKey = Object.keys(keyPressed).join(" ");
-    console.log(multipleBtnKey);
-    const btnType = getPressedKeyboardBtnType(multipleBtnKey);
-    switch (btnType) {
-      //INPUT NUMBERS
-      case "number":
-        const [keyboardBtn] = keyboardNumberCodes.filter(
-          (keyboardCode) => keyboardCode.code === multipleBtnKey
-        );
-        assembleNumberInField(
-          getNumberBtnType(keyboardBtn.code),
-          keyboardBtn.key
-        );
-        break;
-      //INPUT OPERATIONS
-      case "operation":
-        const [operationKeyboardBtn] = keyboardOperationCodes.filter(
-          (keyboardCode) => keyboardCode.code === multipleBtnKey
-        );
-        inputOperation(operationKeyboardBtn.key);
-        break;
-    }
-  }
-  for (const property of Object.getOwnPropertyNames(keyPressed)) {
-    delete keyPressed[property];
-  }
-});
+// document.addEventListener("keyup", () => {
+//   //WHEN 1 button is pressed (i.e. no special operations like shift+5 are used)
+//   if (Object.keys(keyPressed).length === 1) {
+//     const btnType = getPressedKeyboardBtnType(keyboardBtnCode);
+//     switch (btnType) {
+//       //INPUT NUMBERS
+//       case "number":
+//         const [numberKeyboardBtn] = keyboardNumberCodes.filter(
+//           (keyboardCode) => keyboardCode.code === keyboardBtnCode
+//         );
+//         assembleNumberInField(
+//           getNumberBtnType(numberKeyboardBtn.code),
+//           numberKeyboardBtn.key
+//         );
+//         console.log(numberKeyboardBtn.code);
+//         break;
+//       //INPUT OPERATIONS
+//       case "operation":
+//         const [operationKeyboardBtn] = keyboardOperationCodes.filter(
+//           (keyboardCode) => keyboardCode.code === keyboardBtnCode
+//         );
+//         inputOperation(operationKeyboardBtn.key);
+//         console.log(operationKeyboardBtn.code);
+//         break;
+//       //CLEAR THE INPUT
+//       case "clear":
+//         if (calcInput) {
+//           const [clearKeyboardBtn] = keyboardClearInputCodes.filter(
+//             (keyboardCode) => keyboardCode.code === keyboardBtnCode
+//           );
+//           clearInputField(clearKeyboardBtn.key);
+//           console.log(clearKeyboardBtn.code);
+//           isResultCalculated = false;
+//         }
+//         break;
+//     }
+//   }
+//   //FOR HANDLING MULTIPLE BUTTONS PRESSED AT THE SAME TIME
+//   if (Object.keys(keyPressed).length > 1) {
+//     const multipleBtnKey = Object.keys(keyPressed).join(" ");
+//     console.log(multipleBtnKey);
+//     const btnType = getPressedKeyboardBtnType(multipleBtnKey);
+//     switch (btnType) {
+//       //INPUT NUMBERS
+//       case "number":
+//         const [keyboardBtn] = keyboardNumberCodes.filter(
+//           (keyboardCode) => keyboardCode.code === multipleBtnKey
+//         );
+//         assembleNumberInField(
+//           getNumberBtnType(keyboardBtn.code),
+//           keyboardBtn.key
+//         );
+//         break;
+//       //INPUT OPERATIONS
+//       case "operation":
+//         const [operationKeyboardBtn] = keyboardOperationCodes.filter(
+//           (keyboardCode) => keyboardCode.code === multipleBtnKey
+//         );
+//         inputOperation(operationKeyboardBtn.key);
+//         break;
+//     }
+//   }
+//   for (const property of Object.getOwnPropertyNames(keyPressed)) {
+//     delete keyPressed[property];
+//   }
+// });
