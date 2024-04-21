@@ -105,11 +105,12 @@ const inputOperation = (btnText) => {
     : pairOperations.includes(btnText)
     ? "pair"
     : btnText;
-  if (isZero(calcInput)) {
-    if (operationType === "pair") {
-      inputField.value += `0 ${btnText} `;
-      isResultCalculated = false;
-    }
+  if (isZero(calcInput) && operationType === "pair") {
+    calcInput !== "0"
+      ? (inputField.value += `0 ${btnText} `)
+      : (inputField.value += ` ${btnText} `);
+
+    isResultCalculated = false;
   } else if (getNumberOfExpressionElems(calcInput) === 1) {
     switch (operationType) {
       case "pair":
@@ -117,14 +118,16 @@ const inputOperation = (btnText) => {
         isResultCalculated = false;
         break;
       case "single":
-        inputField.value = calculateExpression([calcInput, btnText]);
+        const result = calculateExpression([calcInput, btnText]);
+        inputField.value = !isNaN(result) ? result : "0";
         isResultCalculated = true;
         break;
     }
   } else if (getNumberOfExpressionElems(calcInput) === 2) {
     if (operationType === "single") {
       const inputArr = calcInput.split(" ");
-      inputField.value = calculateExpression([inputArr[0], btnText]);
+      const result = calculateExpression([inputArr[0], btnText]);
+      inputField.value = !isNaN(result) ? result : "0";
       isResultCalculated = true;
     }
   } else if (getNumberOfExpressionElems(calcInput) === 3) {
@@ -212,32 +215,6 @@ const calculateExpression = (expressionArr, percentageOperation = false) => {
   }
 };
 
-const getPressedKeyboardBtnType = (btnCode) => {
-  let btnType = "";
-  keyboardNumberCodes.forEach((numberCode) => {
-    if (numberCode.code === btnCode) {
-      btnType = "number";
-    }
-  });
-
-  if (btnType === "") {
-    keyboardOperationCodes.forEach((numberCode) => {
-      if (numberCode.code === btnCode) {
-        btnType = "operation";
-      }
-    });
-    if (btnType === "") {
-      keyboardClearInputCodes.forEach((numberCode) => {
-        if (numberCode.code === btnCode) {
-          btnType = "clear";
-        }
-      });
-    }
-  }
-
-  return btnType;
-};
-
 $(() => {
   //INPUT NUMBERS
   $(".number-buttons-section").on("click", (event) => {
@@ -280,25 +257,23 @@ $(() => {
   $(document).keydown((event) => {
     let keyCode = event.which;
     keyPressed[keyCode] = true;
-    if (Object.keys(keyPressed).length > 1) {
-      const keys = Object.keys(keyPressed);
-      const [btnsPressed] = keyboardMultipleCodes.filter(
-        (item) => item.firstCode === keys[0] && item.secondCode === keys[1]
-      );
-      if (btnsPressed) {
-        const btnText = btnsPressed.key;
-        const btnType = btnsPressed.type;
-        if (btnType.includes("number")) {
-          if (isResultCalculated) {
-            calcInput = "";
-            inputField.value = "";
-            isResultCalculated = false;
-          }
-          setMathSign();
-          calcInput = inputField.value;
-        } else if (btnType === "operation") {
-          inputOperation(btnText);
+    const keys = Object.keys(keyPressed);
+    const [btnsPressed] = keyboardMultipleCodes.filter(
+      (item) => item.firstCode === keys[0] && item.secondCode === keys[1]
+    );
+    if (btnsPressed) {
+      const btnText = btnsPressed.key;
+      const btnType = btnsPressed.type;
+      if (btnType.includes("number")) {
+        if (isResultCalculated) {
+          calcInput = "";
+          inputField.value = "";
+          isResultCalculated = false;
         }
+        setMathSign();
+        calcInput = inputField.value;
+      } else if (btnType === "operation") {
+        inputOperation(btnText);
       }
     } else {
       keyCode += "";
