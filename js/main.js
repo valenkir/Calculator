@@ -1,3 +1,6 @@
+import { keyboardSingleCodes, keyboardMultipleCodes } from "./keys.js";
+
+localStorage.clear();
 const inputField = document.querySelector(
   ".input-screen-section__input-screen"
 );
@@ -5,38 +8,6 @@ const inputField = document.querySelector(
 let calcInput = "";
 let isResultCalculated = false;
 let keyPressed = {};
-const keyboardSingleCodes = [
-  {
-    code: "49",
-    key: "1",
-    type: "number",
-  },
-  { code: "50", key: "2", type: "number" },
-  { code: "51", key: "3", type: "number" },
-  { code: "52", key: "4", type: "number" },
-  { code: "53", key: "5", type: "number" },
-  { code: "54", key: "6", type: "number" },
-  { code: "55", key: "7", type: "number" },
-  { code: "56", key: "8", type: "number" },
-  { code: "57", key: "9", type: "number" },
-  { code: "48", key: "0", type: "number" },
-  { code: "190", key: ".", type: "number_separator" },
-  { code: "189", key: "-", type: "operation" },
-  { code: "187", key: "=", type: "operation" },
-  { code: "13", key: "=", type: "operation" },
-  { code: "191", key: "/", type: "operation" },
-  { code: "8", key: "delete", type: "clear" },
-  { code: "27", key: "c", type: "clear" },
-  { code: "46", key: "ce", type: "clear" },
-];
-const keyboardMultipleCodes = [
-  { firstCode: "18", secondCode: "189", key: "sign", type: "number_sign" },
-  { firstCode: "16", secondCode: "187", key: "+", type: "operation" },
-  { firstCode: "16", secondCode: "56", key: "x", type: "operation" },
-  { firstCode: "17", secondCode: "221", key: "square", type: "operation" },
-  { firstCode: "17", secondCode: "219", key: "root", type: "operation" },
-  { firstCode: "16", secondCode: "53", key: "%", type: "operation" },
-];
 
 const isZero = (number) => +number === 0;
 
@@ -56,7 +27,8 @@ const isSeparatorPresent = (inputExpression) => {
 
 const removeLastChar = (inputNumber) => {
   const arrNumber = inputNumber.split("");
-  arrNumber[arrNumber.length - 2] === "."
+  arrNumber[arrNumber.length - 2] === "." ||
+  arrNumber[arrNumber.length - 2] === "-"
     ? arrNumber.splice(arrNumber.length - 2, 2)
     : arrNumber.splice(arrNumber.length - 1, 1);
   return arrNumber.join("");
@@ -97,7 +69,7 @@ const setMathSign = () => {
   }
 };
 
-const inputOperation = (btnText) => {
+const inputOperation = (btnText, memoryValue = 0) => {
   const singleOperations = ["root", "square"];
   const pairOperations = ["+", "-", "/", "x"];
   const operationType = singleOperations.includes(btnText)
@@ -154,6 +126,19 @@ const inputOperation = (btnText) => {
         localStorage.setItem("memory", inputField.value);
         isResultCalculated = true;
         break;
+      default:
+        inputField.value = calculateExpression(inputArr);
+        operationType === "M+"
+          ? localStorage.setItem(
+              "memory",
+              parseFloat(inputField.value) + memoryValue
+            )
+          : localStorage.setItem(
+              "memory",
+              memoryValue - parseFloat(inputField.value)
+            );
+        $(".memory-popup").text(localStorage.getItem("memory"));
+        isResultCalculated = true;
     }
   }
   calcInput = inputField.value;
@@ -179,6 +164,7 @@ const clearInputField = (btnText) => {
     case "delete":
       if (!isNaN(lastInputItem) && lastInputItem) {
         lastInputItem = removeLastChar(lastInputItem);
+        console.log(lastInputItem);
         inputArr[inputArr.length - 1] = +lastInputItem + "";
         if (isZero(lastInputItem) && inputArr.length === 1) {
           calcInput = "";
@@ -187,9 +173,6 @@ const clearInputField = (btnText) => {
           calcInput = inputArr.join(" ");
           inputField.value = inputArr.join(" ");
         }
-      } else if (isNaN(lastInputItem)) {
-        calcInput = "";
-        inputField.value = "";
       }
       break;
   }
@@ -220,7 +203,65 @@ const calculateExpression = (expressionArr, percentageOperation = false) => {
   }
 };
 
-const useMemoryValue = (btnText) => {};
+const applyMemoryOperation = (btnText) => {
+  const inputArr = calcInput.split(" ");
+  switch (btnText) {
+    case "MC":
+      localStorage.removeItem("memory");
+      $(".memory-popup").text("Nothing is stored");
+      break;
+    case "MS":
+      getNumberOfExpressionElems(calcInput) < 3
+        ? calcInput
+          ? localStorage.setItem("memory", inputArr[0])
+          : localStorage.setItem("memory", 0)
+        : inputOperation(btnText);
+      $(".memory-popup").text(localStorage.getItem("memory"));
+      break;
+    case "MR":
+      if (localStorage.getItem("memory") !== null) {
+        switch (getNumberOfExpressionElems(calcInput)) {
+          case 1:
+            inputField.value = localStorage.getItem("memory");
+            isResultCalculated = false;
+            break;
+          case 2:
+            inputArr[0] = localStorage.getItem("memory");
+            inputField.value = inputArr.join(" ");
+
+            break;
+          case 3:
+            inputArr[2] = localStorage.getItem("memory");
+            inputField.value = inputArr.join(" ");
+            break;
+        }
+        calcInput = inputField.value;
+      }
+      break;
+    default:
+      if (calcInput) {
+        const memoryValue =
+          localStorage.getItem("memory") !== null
+            ? parseFloat(localStorage.getItem("memory"))
+            : 0;
+        if (getNumberOfExpressionElems(calcInput) < 3) {
+          btnText === "M+"
+            ? localStorage.setItem(
+                "memory",
+                parseFloat(inputArr[0]) + memoryValue
+              )
+            : localStorage.setItem(
+                "memory",
+                memoryValue - parseFloat(inputField.value)
+              );
+          $(".memory-popup").text(localStorage.getItem("memory"));
+        } else {
+          inputOperation(btnText, memoryValue);
+        }
+      }
+      break;
+  }
+};
 
 $(() => {
   //INPUT NUMBERS
@@ -262,40 +303,9 @@ $(() => {
 
   //MRC BUTTONS
   $(".mcr-buttons-section").on("click", (event) => {
-    const btnText = $(event.target).text().trim();
-    const inputArr = calcInput.split(" ");
-    switch (btnText) {
-      case "MC":
-        localStorage.removeItem("memory");
-        $(".memory-popup").text("Nothing is stored");
-        break;
-      case "MS":
-        getNumberOfExpressionElems(calcInput) < 3
-          ? calcInput
-            ? localStorage.setItem("memory", inputArr[0])
-            : localStorage.setItem("memory", 0)
-          : inputOperation(btnText);
-        $(".memory-popup").text(localStorage.getItem("memory"));
-        break;
-      case "MR":
-        if (localStorage.getItem("memory") !== null) {
-          switch (getNumberOfExpressionElems(calcInput)) {
-            case 1:
-              inputField.value = localStorage.getItem("memory");
-              break;
-            case 2:
-              inputArr[0] = localStorage.getItem("memory");
-              inputField.value = inputArr.join(" ");
-
-              break;
-            case 3:
-              inputArr[2] = localStorage.getItem("memory");
-              inputField.value = inputArr.join(" ");
-              break;
-          }
-          calcInput = inputField.value;
-        }
-        break;
+    if ($(event.target).hasClass("mrc-btn")) {
+      const btnText = $(event.target).text().trim();
+      applyMemoryOperation(btnText);
     }
   });
 
@@ -328,6 +338,8 @@ $(() => {
         calcInput = inputField.value;
       } else if (btnType === "operation") {
         inputOperation(btnText);
+      } else if (btnType === "mrc") {
+        applyMemoryOperation(btnText);
       }
     } else {
       keyCode += "";
@@ -363,6 +375,6 @@ $(() => {
   });
 
   $(document).keyup((event) => {
-    delete keyPressed[event.which];
+    keyPressed = {};
   });
 });

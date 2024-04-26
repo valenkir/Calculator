@@ -1,8 +1,7 @@
 FE course challenge - calculator built with grid.
 
 The logic is mostly implemented as in the Windows app "Calculator".
-Current restrictions: the MCR buttons don't work yet.
-Also, there is no limitation for the max number length. It may be added in the future.
+Current restrictions: there is no limitation for the max number length. It may be added in the future.
 
 ---
 
@@ -80,6 +79,30 @@ FEATURES
   You click "square".
   Output: 28 ("square" is not applied).
 
+- The MRC buttons work depending on the initial input.
+  \*MS button:
+
+* if the input is 0/empty - 0 will be stored
+* if the input is a number - the stored value will be replaces with the input number
+* if the input is number and 1 operation - the stored value will be replaces with the input number
+* if the input is the math expression with 2 numbers and an operator - the stored value will be replaces with the calculation result
+  \*M+ and M- buttons:
+
+* if the input is 0/empty - the stored value will not change
+* if the input is a number - the number will be added/subtracted to/from the stored value
+* if the input is number and 1 operation - the number will be added/subtracted to/from the stored value
+* if the input is the math expression with 2 numbers and an operator - the calculation result will be added/subtracted to/from the stored value
+
+\*MR button:
+
+- if the input is 0/empty - the stored value will be shown in the input field
+- if the input is a number - the stored value will replace the input number in the field
+- if the input is number and 1 operation - the stored value will be displayed as the 2nd operand
+- if the input is the math expression with 2 numbers and an operator - the stored value will replace the 2nd operand
+
+\*MC button:
+clears the memory.
+
 - Using the keyboard
   The keyboard is supported but there is one limitation: if the buttons are pressed too fast, the calculator will ignore the input.
 
@@ -94,3 +117,8 @@ FEATURES
 - Backspace - delete
 - Delete - "CE"
 - Esc - "C"
+- Left Ctrl + L - MC
+- Left Alt + R - MR
+- Left Alt + P - M+
+- Left Ctrl + Q - M-
+- Left Ctrl + M - MS
