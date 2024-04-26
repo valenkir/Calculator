@@ -80,18 +80,20 @@ FEATURES
   Output: 28 ("square" is not applied).
 
 - The MRC buttons work depending on the initial input.
-  \*MS button:
 
-* if the input is 0/empty - 0 will be stored
-* if the input is a number - the stored value will be replaces with the input number
-* if the input is number and 1 operation - the stored value will be replaces with the input number
-* if the input is the math expression with 2 numbers and an operator - the stored value will be replaces with the calculation result
-  \*M+ and M- buttons:
+\*MS button:
 
-* if the input is 0/empty - the stored value will not change
-* if the input is a number - the number will be added/subtracted to/from the stored value
-* if the input is number and 1 operation - the number will be added/subtracted to/from the stored value
-* if the input is the math expression with 2 numbers and an operator - the calculation result will be added/subtracted to/from the stored value
+- if the input is 0/empty - 0 will be stored
+- if the input is a number - the stored value will be replaces with the input number
+- if the input is number and 1 operation - the stored value will be replaces with the input number
+- if the input is the math expression with 2 numbers and an operator - the stored value will be replaces with the calculation result
+
+\*M+ and M- buttons:
+
+- if the input is 0/empty - the stored value will not change
+- if the input is a number - the number will be added/subtracted to/from the stored value
+- if the input is number and 1 operation - the number will be added/subtracted to/from the stored value
+- if the input is the math expression with 2 numbers and an operator - the calculation result will be added/subtracted to/from the stored value
 
 \*MR button:
 
