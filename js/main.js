@@ -149,6 +149,11 @@ const inputOperation = (btnText) => {
         inputField.value = calculateExpression(inputArr);
         isResultCalculated = true;
         break;
+      case "MS":
+        inputField.value = calculateExpression(inputArr);
+        localStorage.setItem("memory", inputField.value);
+        isResultCalculated = true;
+        break;
     }
   }
   calcInput = inputField.value;
@@ -215,6 +220,8 @@ const calculateExpression = (expressionArr, percentageOperation = false) => {
   }
 };
 
+const useMemoryValue = (btnText) => {};
+
 $(() => {
   //INPUT NUMBERS
   $(".number-buttons-section").on("click", (event) => {
@@ -251,6 +258,53 @@ $(() => {
         isResultCalculated = false;
       }
     }
+  });
+
+  //MRC BUTTONS
+  $(".mcr-buttons-section").on("click", (event) => {
+    const btnText = $(event.target).text().trim();
+    const inputArr = calcInput.split(" ");
+    switch (btnText) {
+      case "MC":
+        localStorage.removeItem("memory");
+        $(".memory-popup").text("Nothing is stored");
+        break;
+      case "MS":
+        getNumberOfExpressionElems(calcInput) < 3
+          ? calcInput
+            ? localStorage.setItem("memory", inputArr[0])
+            : localStorage.setItem("memory", 0)
+          : inputOperation(btnText);
+        $(".memory-popup").text(localStorage.getItem("memory"));
+        break;
+      case "MR":
+        if (localStorage.getItem("memory") !== null) {
+          switch (getNumberOfExpressionElems(calcInput)) {
+            case 1:
+              inputField.value = localStorage.getItem("memory");
+              break;
+            case 2:
+              inputArr[0] = localStorage.getItem("memory");
+              inputField.value = inputArr.join(" ");
+
+              break;
+            case 3:
+              inputArr[2] = localStorage.getItem("memory");
+              inputField.value = inputArr.join(" ");
+              break;
+          }
+          calcInput = inputField.value;
+        }
+        break;
+    }
+  });
+
+  //MEMORY STORAGE BUTTON
+  $(".input-screen-section__history-btn").on("mouseenter", () => {
+    $(".memory-popup").css("display", "block");
+  });
+  $(".input-screen-section__history-btn").on("mouseleave", () => {
+    $(".memory-popup").css("display", "none");
   });
 
   //KEYBOARD EVENTS

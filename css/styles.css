@@ -2,12 +2,6 @@
   font-family: "Gloria Hallelujah";
   src: url("../assets/fonts/GloriaHallelujah-Regular.ttf");
 }
-body {
-  padding: 2%;
-  font-size: 1.5rem;
-  font-family: "Gloria Hallelujah", sans-serif;
-}
-
 .primary-btn {
   font-family: "Gloria Hallelujah", sans-serif;
   font-weight: bold;
@@ -74,12 +68,35 @@ body {
   border-radius: 230px 40px 200px 5px/10px 225px 25px 260px;
 }
 
+body {
+  padding: 2%;
+  font-size: 1.5rem;
+  font-family: "Gloria Hallelujah", sans-serif;
+}
+
+main {
+  position: absolute;
+}
+
 .calculator {
   border: 0.2rem solid black;
   width: 35rem;
   height: 42.5rem;
   padding: 2%;
   background-color: rgb(252, 235, 239);
+}
+
+.memory-popup {
+  display: none;
+  background-color: rgb(252, 235, 239);
+  position: absolute;
+  padding: 10px 20px;
+  height: 200px;
+  width: 300px;
+  word-wrap: break-word;
+  right: -365px;
+  border: 2px solid rgb(51, 51, 51);
+  font-size: 30px;
 }
 
 .input-screen-section {
@@ -95,17 +112,6 @@ body {
   margin-left: auto;
   width: 3rem;
   height: 3rem;
-}
-
-.input-screen-section__history-icon-svg {
-  width: 6rem;
-  height: 6rem;
-}
-
-.input-screen-section__history-icon {
-  stroke: black;
-  stroke-width: 0.7rem;
-  fill: none;
 }
 
 .input-screen-section__input-screen {
