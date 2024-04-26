@@ -8,6 +8,8 @@ const inputField = document.querySelector(
 let calcInput = "";
 let isResultCalculated = false;
 let keyPressed = {};
+let tomorrow = new Date();
+tomorrow.setDate(tomorrow.getDate() + 1);
 
 const isZero = (number) => +number === 0;
 
@@ -203,7 +205,22 @@ const calculateExpression = (expressionArr, percentageOperation = false) => {
   }
 };
 
+const updateMRCCookie = () => {
+  let allCookies = document.cookie;
+  allCookies = allCookies.split(";");
+  const mrcCookie = allCookies.filter((cookieStr) => cookieStr.includes("mrc"));
+  if (mrcCookie.length) {
+    const mrcCookieValue = mrcCookie[0].split("=");
+    mrcCookieValue[1] = +mrcCookieValue[1] + 1;
+    document.cookie = `${mrcCookieValue.join("=")};expires=${tomorrow}`;
+  } else {
+    document.cookie = `mrc=1;expires=${tomorrow}`;
+  }
+  console.log(document.cookie);
+};
+
 const applyMemoryOperation = (btnText) => {
+  updateMRCCookie();
   const inputArr = calcInput.split(" ");
   switch (btnText) {
     case "MC":
